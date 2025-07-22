@@ -85,22 +85,57 @@ class Boid {
     }
 }
 
-const boids = Array.from({ length: 500 }, () => new Boid());
+const boids = [];
+let colors;
+let vertices;
+let boidGeometry = new THREE.BufferGeometry();
+const boidMaterial = new THREE.PointsMaterial({ size: 2, vertexColors: true });
+let points = new THREE.Points(boidGeometry, boidMaterial);
+scene.add(points);
+
+addBoids(500);
+rebuildGeometry();
 setupGUI(boids);
 
-const colors = new Float32Array(boids.length * 3);
-const vertices = new Float32Array(boids.length * 3);
-boids.forEach((boid, i) => {
-    vertices.set([boid.position.x, boid.position.y, boid.position.z], i * 3);
-});
+const numBoidsInput = document.getElementById('num-boids');
+if (numBoidsInput) {
+    numBoidsInput.addEventListener('change', () => {
+        const value = parseInt(numBoidsInput.value, 10);
+        if (!isNaN(value) && value > 0) {
+            updateBoidCount(value);
+        }
+    });
+}
 
-const boidGeometry = new THREE.BufferGeometry();
-boidGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-boidGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+function rebuildGeometry() {
+    colors = new Float32Array(boids.length * 3);
+    vertices = new Float32Array(boids.length * 3);
+    boids.forEach((boid, i) => {
+        vertices.set([boid.position.x, boid.position.y, boid.position.z], i * 3);
+    });
+    const newGeometry = new THREE.BufferGeometry();
+    newGeometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    newGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    points.geometry.dispose();
+    points.geometry = newGeometry;
+    boidGeometry = newGeometry;
+}
 
-const boidMaterial = new THREE.PointsMaterial({ size: 2, vertexColors: true });
-const points = new THREE.Points(boidGeometry, boidMaterial);
-scene.add(points);
+function addBoids(count) {
+    for (let i = 0; i < count; i++) {
+        boids.push(new Boid());
+    }
+}
+
+function updateBoidCount(newCount) {
+    const diff = newCount - boids.length;
+    if (diff > 0) {
+        addBoids(diff);
+    } else if (diff < 0) {
+        boids.splice(newCount);
+    }
+    rebuildGeometry();
+}
 
 const minDistance = 0;
 const maxDistance = 500;
