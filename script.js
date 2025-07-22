@@ -37,11 +37,14 @@ class Attractor {
     }
     influence(boid) {
         const force = this.position.clone().sub(boid.position);
-        force.multiplyScalar(this.strength / force.lengthSq());
+        const distSq = force.lengthSq();
+        if (distSq === 0) return;
+        force.multiplyScalar(this.strength / distSq);
+        force.clampLength(0, 0.02);
         boid.velocity.add(force);
     }
 }
-const attractor = new Attractor(new THREE.Vector3(0, 0, 0), 0.7);
+const attractor = new Attractor(new THREE.Vector3(0, 0, 0), 0.3);
 scene.add(new THREE.Mesh(new THREE.SphereGeometry(0), new THREE.MeshBasicMaterial()).position.copy(attractor.position));
 
 // Boids
@@ -49,12 +52,12 @@ class Boid {
     constructor() {
         this.velocity = new THREE.Vector3((Math.random() - 0.5), (Math.random() - 0.5), (Math.random() - 0.5));
         this.position = new THREE.Vector3(Math.random() * 400 - 200, Math.random() * 400 - 200, Math.random() * 400 - 200);
-        this.alignmentStrength = 0.4;
-        this.cohesionStrength = 0.003;
-        this.separationStrength = 0.08;
-        this.perceptionRadius = 50;
+        this.alignmentStrength = 0.2;
+        this.cohesionStrength = 0.01;
+        this.separationStrength = 0.1;
+        this.perceptionRadius = 60;
         this.separationDistance = 20;
-        this.maxSpeed = 1.4;
+        this.maxSpeed = 1.0;
     }
     update(boids) {
         let alignment = new THREE.Vector3();
@@ -81,6 +84,7 @@ class Boid {
             separation.divideScalar(count).multiplyScalar(this.separationStrength);
         }
         this.velocity.add(alignment).add(cohesion).add(separation);
+        this.velocity.multiplyScalar(0.98);
         this.velocity.clampLength(0.5, this.maxSpeed);
         this.position.add(this.velocity);
         ['x','y','z'].forEach(axis => {
@@ -101,7 +105,7 @@ scene.add(points);
 
 addBoids(500);
 rebuildGeometry();
-setupGUI(boids);
+setupGUI(boids, attractor);
 
 const numBoidsInput = document.getElementById('num-boids');
 if (numBoidsInput) {
@@ -109,6 +113,16 @@ if (numBoidsInput) {
         const value = parseInt(numBoidsInput.value, 10);
         if (!isNaN(value) && value > 0) {
             updateBoidCount(value);
+        }
+    });
+}
+
+const attractorStrengthInput = document.getElementById('attractor-strength');
+if (attractorStrengthInput) {
+    attractorStrengthInput.addEventListener('input', () => {
+        const value = parseFloat(attractorStrengthInput.value);
+        if (!isNaN(value)) {
+            attractor.strength = value;
         }
     });
 }
