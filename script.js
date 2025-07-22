@@ -103,6 +103,22 @@ const boidMaterial = new THREE.PointsMaterial({ size: 2, vertexColors: true });
 let points = new THREE.Points(boidGeometry, boidMaterial);
 scene.add(points);
 
+const lineMaterial = new THREE.LineBasicMaterial({ color: 0x3333ff });
+let lineSegments = new THREE.LineSegments(new THREE.BufferGeometry(), lineMaterial);
+scene.add(lineSegments);
+
+const coordContainer = document.createElement('div');
+coordContainer.style.position = 'absolute';
+coordContainer.style.top = '0';
+coordContainer.style.left = '0';
+coordContainer.style.pointerEvents = 'none';
+coordContainer.style.fontSize = '10px';
+document.body.appendChild(coordContainer);
+let coordSpans = [];
+
+let showLines = false;
+let showCoords = false;
+
 addBoids(500);
 rebuildGeometry();
 setupGUI(boids, attractor);
@@ -127,6 +143,21 @@ if (attractorStrengthInput) {
     });
 }
 
+const showLinesInput = document.getElementById('show-lines');
+if (showLinesInput) {
+    showLinesInput.addEventListener('change', () => {
+        showLines = showLinesInput.checked;
+        lineSegments.visible = showLines;
+    });
+}
+
+const showCoordsInput = document.getElementById('show-coords');
+if (showCoordsInput) {
+    showCoordsInput.addEventListener('change', () => {
+        showCoords = showCoordsInput.checked;
+    });
+}
+
 function rebuildGeometry() {
     colors = new Float32Array(boids.length * 3);
     vertices = new Float32Array(boids.length * 3);
@@ -139,6 +170,41 @@ function rebuildGeometry() {
     points.geometry.dispose();
     points.geometry = newGeometry;
     boidGeometry = newGeometry;
+    updateCoordinateElements();
+}
+
+function updateCoordinateElements() {
+    while (coordSpans.length < boids.length) {
+        const span = document.createElement('span');
+        span.style.position = 'absolute';
+        span.style.color = 'black';
+        coordContainer.appendChild(span);
+        coordSpans.push(span);
+    }
+    while (coordSpans.length > boids.length) {
+        const s = coordSpans.pop();
+        coordContainer.removeChild(s);
+    }
+}
+
+function updateLines() {
+    if (!showLines) return;
+    const positions = [];
+    boids.forEach((boid, i) => {
+        const sorted = boids
+            .map((b, idx) => ({ b, d: boid.position.distanceToSquared(b.position), idx }))
+            .filter(o => o.idx !== i)
+            .sort((a, b) => a.d - b.d)
+            .slice(0, 3);
+        sorted.forEach(n => {
+            positions.push(boid.position.x, boid.position.y, boid.position.z);
+            positions.push(n.b.position.x, n.b.position.y, n.b.position.z);
+        });
+    });
+    const arr = new Float32Array(positions);
+    lineSegments.geometry.dispose();
+    lineSegments.geometry = new THREE.BufferGeometry();
+    lineSegments.geometry.setAttribute('position', new THREE.BufferAttribute(arr, 3));
 }
 
 function addBoids(count) {
@@ -164,6 +230,7 @@ function updateBoidCount(newCount) {
         boids.splice(newCount);
     }
     rebuildGeometry();
+    updateCoordinateElements();
 }
 
 const minDistance = 0;
@@ -178,6 +245,25 @@ function animate() {
         const boidColor = nearColor.clone().lerp(farColor, distanceFactor);
         colors.set([boidColor.r, boidColor.g, boidColor.b], i * 3);
     });
+    if (showLines) {
+        updateLines();
+        lineSegments.visible = true;
+    } else {
+        lineSegments.visible = false;
+    }
+    if (showCoords) {
+        coordContainer.style.display = 'block';
+        boids.forEach((boid, i) => {
+            const proj = boid.position.clone().project(camera);
+            const x = (proj.x + 1) / 2 * window.innerWidth;
+            const y = (1 - proj.y) / 2 * window.innerHeight;
+            const span = coordSpans[i];
+            span.style.transform = `translate(${x}px, ${y}px)`;
+            span.textContent = `${Math.round(boid.position.x)},${Math.round(boid.position.y)},${Math.round(boid.position.z)}`;
+        });
+    } else {
+        coordContainer.style.display = 'none';
+    }
     boidGeometry.attributes.position.needsUpdate = true;
     boidGeometry.attributes.color.needsUpdate = true;
     renderer.render(scene, camera);
