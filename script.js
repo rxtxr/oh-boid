@@ -52,6 +52,8 @@ class Boid {
         this.alignmentStrength = 0.4;
         this.cohesionStrength = 0.003;
         this.separationStrength = 0.08;
+        this.perceptionRadius = 50;
+        this.separationDistance = 20;
         this.maxSpeed = 1.4;
     }
     update(boids) {
@@ -61,18 +63,22 @@ class Boid {
         let count = 0;
         for (let other of boids) {
             if (other !== this) {
-                cohesion.add(other.position);
-                alignment.add(other.velocity);
-                if (this.position.distanceTo(other.position) < 5) {
-                    separation.subVectors(this.position, other.position);
+                const d = this.position.distanceTo(other.position);
+                if (d < this.perceptionRadius) {
+                    cohesion.add(other.position);
+                    alignment.add(other.velocity);
+                    if (d < this.separationDistance) {
+                        const diff = new THREE.Vector3().subVectors(this.position, other.position).divideScalar(d);
+                        separation.add(diff);
+                    }
+                    count++;
                 }
-                count++;
             }
         }
         if (count > 0) {
             cohesion.divideScalar(count).sub(this.position).multiplyScalar(this.cohesionStrength);
             alignment.divideScalar(count).sub(this.velocity).multiplyScalar(this.alignmentStrength);
-            separation.multiplyScalar(this.separationStrength);
+            separation.divideScalar(count).multiplyScalar(this.separationStrength);
         }
         this.velocity.add(alignment).add(cohesion).add(separation);
         this.velocity.clampLength(0.5, this.maxSpeed);
@@ -123,7 +129,16 @@ function rebuildGeometry() {
 
 function addBoids(count) {
     for (let i = 0; i < count; i++) {
-        boids.push(new Boid());
+        const b = new Boid();
+        if (boids.length > 0) {
+            const ref = boids[0];
+            b.maxSpeed = ref.maxSpeed;
+            b.alignmentStrength = ref.alignmentStrength;
+            b.cohesionStrength = ref.cohesionStrength;
+            b.separationStrength = ref.separationStrength;
+            b.perceptionRadius = ref.perceptionRadius;
+        }
+        boids.push(b);
     }
 }
 
