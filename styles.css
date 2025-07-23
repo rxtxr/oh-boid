@@ -1,2 +1,19 @@
-body { margin: 0; padding: 0; }
-canvas { display: block; margin: 0; padding: 0;}
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+canvas {
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+#boid-config {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.8);
+    font-family: sans-serif;
+    padding: 5px;
+}
