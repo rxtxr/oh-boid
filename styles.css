@@ -17,3 +17,12 @@ canvas {
     font-family: sans-serif;
     padding: 5px;
 }
+#show-controls {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9;
+}
+#toggle-controls {
+    margin-top: 5px;
+}
