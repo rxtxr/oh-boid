@@ -12,7 +12,7 @@ const nearColor = new THREE.Color(0x000000);
 const farColor = backgroundColor;
 
 // Hintergrund
-const { update: updateBackground } = setupBackground(scene);
+const { update: updateBackground, setParams: setCloudParams } = setupBackground(scene);
 
 renderer.setSize(window.innerWidth, window.innerHeight);
 window.addEventListener('resize', onWindowResize);
@@ -131,6 +131,11 @@ const alignmentInput = document.getElementById('alignment-strength');
 const cohesionInput = document.getElementById('cohesion-strength');
 const separationInput = document.getElementById('separation-strength');
 const perceptionInput = document.getElementById('perception-radius');
+const scale1Input = document.getElementById('cloud-scale1');
+const scale2Input = document.getElementById('cloud-scale2');
+const noiseMixInput = document.getElementById('cloud-mix');
+const lowThInput = document.getElementById('cloud-low-threshold');
+const highThInput = document.getElementById('cloud-high-threshold');
 
 const numBoidsValue = document.getElementById('num-boids-value');
 const attractorStrengthValue = document.getElementById('attractor-strength-value');
@@ -139,6 +144,11 @@ const alignmentValue = document.getElementById('alignment-strength-value');
 const cohesionValue = document.getElementById('cohesion-strength-value');
 const separationValue = document.getElementById('separation-strength-value');
 const perceptionValue = document.getElementById('perception-radius-value');
+const scale1Value = document.getElementById('cloud-scale1-value');
+const scale2Value = document.getElementById('cloud-scale2-value');
+const noiseMixValue = document.getElementById('cloud-mix-value');
+const lowThValue = document.getElementById('cloud-low-threshold-value');
+const highThValue = document.getElementById('cloud-high-threshold-value');
 
 function updateValueDisplays() {
     if (numBoidsValue) numBoidsValue.textContent = numBoidsInput.value;
@@ -148,9 +158,23 @@ function updateValueDisplays() {
     if (cohesionValue) cohesionValue.textContent = cohesionInput.value;
     if (separationValue) separationValue.textContent = separationInput.value;
     if (perceptionValue) perceptionValue.textContent = perceptionInput.value;
+    if (scale1Value) scale1Value.textContent = scale1Input.value;
+    if (scale2Value) scale2Value.textContent = scale2Input.value;
+    if (noiseMixValue) noiseMixValue.textContent = noiseMixInput.value;
+    if (lowThValue) lowThValue.textContent = lowThInput.value;
+    if (highThValue) highThValue.textContent = highThInput.value;
 }
 
 updateValueDisplays();
+if (setCloudParams) {
+    setCloudParams({
+        scale1: parseFloat(scale1Input.value),
+        scale2: parseFloat(scale2Input.value),
+        noiseMix: parseFloat(noiseMixInput.value),
+        lowThreshold: parseFloat(lowThInput.value),
+        highThreshold: parseFloat(highThInput.value)
+    });
+}
 
 if (numBoidsInput) {
     numBoidsInput.addEventListener('change', () => {
@@ -196,6 +220,24 @@ if (showCoordsInput) {
     }
 });
 
+[scale1Input, scale2Input, noiseMixInput, lowThInput, highThInput].forEach(inp => {
+    if (inp) {
+        inp.addEventListener('input', () => {
+            updateValueDisplays();
+            setCloudParams({
+                scale1: parseFloat(scale1Input.value),
+                scale2: parseFloat(scale2Input.value),
+                noiseMix: parseFloat(noiseMixInput.value),
+                lowThreshold: parseFloat(lowThInput.value),
+                highThreshold: parseFloat(highThInput.value)
+            });
+        });
+        inp.addEventListener('change', () => {
+            updateValueDisplays();
+        });
+    }
+});
+
 const resetButton = document.getElementById('reset-canvas');
 if (resetButton) {
     resetButton.addEventListener('click', () => {
@@ -233,6 +275,11 @@ if (saveButton) {
             cohesionStrength: cohesionInput.value,
             separationStrength: separationInput.value,
             perceptionRadius: perceptionInput.value,
+            cloudScale1: scale1Input.value,
+            cloudScale2: scale2Input.value,
+            cloudMix: noiseMixInput.value,
+            cloudLowThreshold: lowThInput.value,
+            cloudHighThreshold: highThInput.value,
             showLines: showLinesInput.checked,
             showCoords: showCoordsInput.checked
         };
@@ -253,6 +300,11 @@ if (loadButton) {
         if (settings.cohesionStrength !== undefined) cohesionInput.value = settings.cohesionStrength;
         if (settings.separationStrength !== undefined) separationInput.value = settings.separationStrength;
         if (settings.perceptionRadius !== undefined) perceptionInput.value = settings.perceptionRadius;
+        if (settings.cloudScale1 !== undefined) scale1Input.value = settings.cloudScale1;
+        if (settings.cloudScale2 !== undefined) scale2Input.value = settings.cloudScale2;
+        if (settings.cloudMix !== undefined) noiseMixInput.value = settings.cloudMix;
+        if (settings.cloudLowThreshold !== undefined) lowThInput.value = settings.cloudLowThreshold;
+        if (settings.cloudHighThreshold !== undefined) highThInput.value = settings.cloudHighThreshold;
         if (settings.showLines !== undefined) {
             showLinesInput.checked = settings.showLines;
             showLines = showLinesInput.checked;
@@ -263,6 +315,15 @@ if (loadButton) {
             showCoords = showCoordsInput.checked;
         }
         updateValueDisplays();
+        if (setCloudParams) {
+            setCloudParams({
+                scale1: parseFloat(scale1Input.value),
+                scale2: parseFloat(scale2Input.value),
+                noiseMix: parseFloat(noiseMixInput.value),
+                lowThreshold: parseFloat(lowThInput.value),
+                highThreshold: parseFloat(highThInput.value)
+            });
+        }
         const num = parseInt(numBoidsInput.value, 10);
         if (!isNaN(num) && num >= 0) {
             updateBoidCount(num);
