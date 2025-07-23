@@ -45,11 +45,21 @@ canvas {
     margin-top: 5px;
 }
 h1 {
-  font-family: 'Literata', serif;
-  font-size: clamp(4rem, 10vw, 8rem);
-  font-weight: 700;
-  text-align: center;
-  color: #ffffff;
-  mix-blend-mode: overlay;
-  line-height: 1;
+    font-family: 'Literata', serif;
+    font-size: clamp(4rem, 10vw, 8rem);
+    font-weight: 700;
+    text-align: center;
+    color: #ffffff;
+    mix-blend-mode: overlay;
+    line-height: 1;
+}
+
+#page-title {
+  position: fixed;
+  top: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  pointer-events: none;
+  z-index: 10;
 }
