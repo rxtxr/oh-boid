@@ -80,11 +80,17 @@
           <input type="range" id="cloud-high-threshold" value="0.7" min="0" max="1" step="0.01">
           <span id="cloud-high-threshold-value">0.7</span>
       </label>
-    <br>
-    <label>
-        Linien zu Nachbarn anzeigen:
-        <input type="checkbox" id="show-lines">
-    </label>
+      <br>
+      <label>
+          Blur-Distanz:
+          <input type="range" id="blur-distance" value="500" min="100" max="2000" step="50">
+          <span id="blur-distance-value">500</span>
+      </label>
+      <br>
+      <label>
+          Linien zu Nachbarn anzeigen:
+          <input type="checkbox" id="show-lines">
+      </label>
     <br>
       <label>
           Koordinaten anzeigen:
@@ -104,7 +110,10 @@
       <button id="reset-canvas">Canvas zurücksetzen</button>
       <button id="save-settings">Einstellungen speichern</button>
       <button id="load-settings">Einstellungen laden</button>
+      <button id="toggle-controls">Steuerung ausblenden</button>
     </div>
+
+    <button id="show-controls" style="display:none;">Steuerung einblenden</button>
 
   <script type="module">
     import './script.js';
