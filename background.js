@@ -5,7 +5,9 @@ export function setupBackground(scene) {
   const cloudTex = loader.load('clouds.jpg');
   cloudTex.wrapS = cloudTex.wrapT = THREE.RepeatWrapping;
 
-  const geometry = new THREE.PlaneGeometry(2000, 1000);
+  const baseWidth = 2000;
+  const baseHeight = 1000;
+  const geometry = new THREE.PlaneGeometry(baseWidth, baseHeight);
   const uniforms = {
     time: { value: 0 },
     cloudTex: { value: cloudTex },
@@ -72,10 +74,19 @@ export function setupBackground(scene) {
   mesh.position.z = -500;
   scene.add(mesh);
 
+  function updateSize(camera) {
+    if (!camera) return;
+    const distance = camera.position.z - mesh.position.z;
+    const height = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov * 0.5)) * distance;
+    const width = height * camera.aspect;
+    mesh.scale.set(width / baseWidth, height / baseHeight, 1);
+  }
+
   return {
     mesh,
-    update(time) {
+    update(time, camera) {
       uniforms.time.value = time;
+      updateSize(camera);
     },
     setParams(params) {
       if (params.scale1 !== undefined) uniforms.scale1.value = params.scale1;
@@ -84,6 +95,7 @@ export function setupBackground(scene) {
       if (params.lowThreshold !== undefined) uniforms.lowThreshold.value = params.lowThreshold;
       if (params.highThreshold !== undefined) uniforms.highThreshold.value = params.highThreshold;
       if (params.mixStrength !== undefined) uniforms.mixStrength.value = params.mixStrength;
-    }
+    },
+    updateSize
   };
 }
