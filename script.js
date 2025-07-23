@@ -89,8 +89,8 @@ class Boid {
             if (this.position[axis] > 200) this.position[axis] = -200;
             else if (this.position[axis] < -200) this.position[axis] = 200;
         });
-        if (this.position.z > 200) this.position.z = -500;
-        else if (this.position.z < -500) this.position.z = 200;
+        if (this.position.z > 400) this.position.z = -1200;
+        else if (this.position.z < -1200) this.position.z = 400;
         attractor.influence(this);
     }
 }
@@ -163,6 +163,8 @@ const lowThInput = document.getElementById('cloud-low-threshold');
 const highThInput = document.getElementById('cloud-high-threshold');
 const fgColorInput = document.getElementById('foreground-color');
 const bgColorInput = document.getElementById('background-color');
+const fgBlurInput = document.getElementById('foreground-blur');
+const bgBlurInput = document.getElementById('background-blur');
 
 const numBoidsValue = document.getElementById('num-boids-value');
 const attractorStrengthValue = document.getElementById('attractor-strength-value');
@@ -176,6 +178,8 @@ const scale2Value = document.getElementById('cloud-scale2-value');
 const noiseMixValue = document.getElementById('cloud-mix-value');
 const lowThValue = document.getElementById('cloud-low-threshold-value');
 const highThValue = document.getElementById('cloud-high-threshold-value');
+const fgBlurValue = document.getElementById('foreground-blur-value');
+const bgBlurValue = document.getElementById('background-blur-value');
 // We don't display color values, but inputs exist for user adjustments
 
 function updateValueDisplays() {
@@ -191,6 +195,8 @@ function updateValueDisplays() {
     if (noiseMixValue) noiseMixValue.textContent = noiseMixInput.value;
     if (lowThValue) lowThValue.textContent = lowThInput.value;
     if (highThValue) highThValue.textContent = highThInput.value;
+    if (fgBlurValue) fgBlurValue.textContent = fgBlurInput.value;
+    if (bgBlurValue) bgBlurValue.textContent = bgBlurInput.value;
 }
 
 updateValueDisplays();
@@ -200,7 +206,8 @@ if (setCloudParams) {
         scale2: parseFloat(scale2Input.value),
         noiseMix: parseFloat(noiseMixInput.value),
         lowThreshold: parseFloat(lowThInput.value),
-        highThreshold: parseFloat(highThInput.value)
+        highThreshold: parseFloat(highThInput.value),
+        blurAmount: parseFloat(bgBlurInput.value)
     });
 }
 
@@ -257,6 +264,22 @@ if (bgColorInput) {
     });
 }
 
+if (fgBlurInput) {
+    boidMaterial.size = 4 + parseFloat(fgBlurInput.value);
+    fgBlurInput.addEventListener('input', () => {
+        boidMaterial.size = 4 + parseFloat(fgBlurInput.value);
+        updateValueDisplays();
+    });
+}
+
+if (bgBlurInput) {
+    if (setCloudParams) setCloudParams({ blurAmount: parseFloat(bgBlurInput.value) });
+    bgBlurInput.addEventListener('input', () => {
+        if (setCloudParams) setCloudParams({ blurAmount: parseFloat(bgBlurInput.value) });
+        updateValueDisplays();
+    });
+}
+
 [maxSpeedInput, alignmentInput, cohesionInput, separationInput, perceptionInput].forEach(inp => {
     if (inp) {
         inp.addEventListener('input', updateValueDisplays);
@@ -273,7 +296,8 @@ if (bgColorInput) {
                 scale2: parseFloat(scale2Input.value),
                 noiseMix: parseFloat(noiseMixInput.value),
                 lowThreshold: parseFloat(lowThInput.value),
-                highThreshold: parseFloat(highThInput.value)
+                highThreshold: parseFloat(highThInput.value),
+                blurAmount: parseFloat(bgBlurInput.value)
             });
         });
         inp.addEventListener('change', () => {
@@ -324,6 +348,8 @@ if (saveButton) {
             cloudMix: noiseMixInput.value,
             cloudLowThreshold: lowThInput.value,
             cloudHighThreshold: highThInput.value,
+            foregroundBlur: fgBlurInput.value,
+            backgroundBlur: bgBlurInput.value,
             showLines: showLinesInput.checked,
             showCoords: showCoordsInput.checked
         };
@@ -349,6 +375,8 @@ if (loadButton) {
         if (settings.cloudMix !== undefined) noiseMixInput.value = settings.cloudMix;
         if (settings.cloudLowThreshold !== undefined) lowThInput.value = settings.cloudLowThreshold;
         if (settings.cloudHighThreshold !== undefined) highThInput.value = settings.cloudHighThreshold;
+        if (settings.foregroundBlur !== undefined) fgBlurInput.value = settings.foregroundBlur;
+        if (settings.backgroundBlur !== undefined) bgBlurInput.value = settings.backgroundBlur;
         if (settings.showLines !== undefined) {
             showLinesInput.checked = settings.showLines;
             showLines = showLinesInput.checked;
@@ -365,7 +393,8 @@ if (loadButton) {
                 scale2: parseFloat(scale2Input.value),
                 noiseMix: parseFloat(noiseMixInput.value),
                 lowThreshold: parseFloat(lowThInput.value),
-                highThreshold: parseFloat(highThInput.value)
+                highThreshold: parseFloat(highThInput.value),
+                blurAmount: parseFloat(bgBlurInput.value)
             });
         }
         const num = parseInt(numBoidsInput.value, 10);
@@ -466,7 +495,7 @@ function adjustSettings(fps) {
 }
 
 const minDistance = 0;
-const maxDistance = 500;
+const maxDistance = 1200;
 
 function animate() {
     requestAnimationFrame(animate);
