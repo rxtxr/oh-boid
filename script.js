@@ -12,14 +12,16 @@ const nearColor = new THREE.Color(0x000000);
 const farColor = renderer.getClearColor(new THREE.Color());
 
 // Hintergrund
-const { update: updateBackground, setParams: setCloudParams } = setupBackground(scene);
+const { update: updateBackground, setParams: setCloudParams, updateSize: updateBackgroundSize } = setupBackground(scene);
 
 renderer.setSize(window.innerWidth, window.innerHeight);
+updateBackgroundSize(camera);
 window.addEventListener('resize', onWindowResize);
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    updateBackgroundSize(camera);
 }
 document.body.appendChild(renderer.domElement);
 camera.position.z = 100;
@@ -496,7 +498,7 @@ function animate() {
     if (fpsDisplay) fpsDisplay.textContent = fps.toFixed(1);
     adjustSettings(fps);
 
-    updateBackground(now * 0.001);
+    updateBackground(now * 0.001, camera);
     boids.forEach((boid, i) => {
         boid.update(boids);
         vertices.set([boid.position.x, boid.position.y, boid.position.z], i * 3);
