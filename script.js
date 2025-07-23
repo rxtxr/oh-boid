@@ -26,6 +26,41 @@ function onWindowResize() {
 document.body.appendChild(renderer.domElement);
 camera.position.z = 100;
 
+function createTextSprite(text) {
+    const fontSize = 64;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.font = `bold ${fontSize}px 'Literata', serif`;
+    const metrics = ctx.measureText(text);
+    canvas.width = metrics.width + 20;
+    canvas.height = fontSize * 1.4;
+    ctx.font = `bold ${fontSize}px 'Literata', serif`;
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'white';
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 4;
+    ctx.strokeText(text, 10, canvas.height / 2);
+    ctx.fillText(text, 10, canvas.height / 2);
+    const texture = new THREE.CanvasTexture(canvas);
+    const material = new THREE.SpriteMaterial({
+        map: texture,
+        transparent: true,
+        depthWrite: false
+    });
+    const sprite = new THREE.Sprite(material);
+    const scaleFactor = 0.25;
+    sprite.scale.set(canvas.width * scaleFactor, canvas.height * scaleFactor, 1);
+    return sprite;
+}
+
+let headingSprite;
+let headingOpacity = 1.0;
+document.fonts.ready.then(() => {
+    headingSprite = createTextSprite('Der exquisite Zerfall der Bedeutung im gläsernen Zeitalter');
+    headingSprite.position.set(0, 80, 0);
+    scene.add(headingSprite);
+});
+
 // Attraktor
 class Attractor {
     constructor(position, strength) {
@@ -525,6 +560,12 @@ function animate() {
         });
     } else {
         coordContainer.style.display = 'none';
+    }
+    if (headingSprite) {
+        headingSprite.material.opacity = headingOpacity;
+        if (headingOpacity > 0) {
+            headingOpacity -= 0.005;
+        }
     }
     boidGeometry.attributes.position.needsUpdate = true;
     boidGeometry.attributes.color.needsUpdate = true;
