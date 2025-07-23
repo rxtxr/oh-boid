@@ -1,8 +1,15 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js';
 
 export function setupBackground(scene) {
+  const loader = new THREE.TextureLoader();
+  const cloudTex = loader.load('clouds.jpg');
+  cloudTex.wrapS = cloudTex.wrapT = THREE.RepeatWrapping;
+
   const geometry = new THREE.PlaneGeometry(2000, 1000);
-  const uniforms = { time: { value: 0 } };
+  const uniforms = {
+    time: { value: 0 },
+    cloudTex: { value: cloudTex }
+  };
   const material = new THREE.ShaderMaterial({
     uniforms,
     side: THREE.DoubleSide,
@@ -16,6 +23,7 @@ export function setupBackground(scene) {
     fragmentShader: `
       varying vec2 vUv;
       uniform float time;
+      uniform sampler2D cloudTex;
 
       float rand(vec2 co){
         return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
@@ -38,10 +46,13 @@ export function setupBackground(scene) {
       }
 
       void main() {
-        float n = noise(vUv*4.0 + vec2(time*0.05));
-        float n2 = noise(vUv*8.0 - vec2(time*0.03));
+        vec2 uv = vUv;
+        vec4 base = texture2D(cloudTex, uv);
+        float n = noise(uv*4.0 + vec2(time*0.05));
+        float n2 = noise(uv*8.0 - vec2(time*0.03));
         float value = smoothstep(0.3,0.7,mix(n,n2,0.5));
-        gl_FragColor = vec4(vec3(value),1.0);
+        vec3 color = mix(base.rgb, vec3(value), 0.4);
+        gl_FragColor = vec4(color, 1.0);
       }
     `
   });
