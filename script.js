@@ -64,6 +64,7 @@ class Boid {
         let cohesion = new THREE.Vector3();
         let separation = new THREE.Vector3();
         let count = 0;
+        let sepCount = 0;
         for (let other of boids) {
             if (other !== this) {
                 const d = this.position.distanceTo(other.position);
@@ -73,6 +74,7 @@ class Boid {
                     if (d < this.separationDistance) {
                         const diff = new THREE.Vector3().subVectors(this.position, other.position).divideScalar(d);
                         separation.add(diff);
+                        sepCount++;
                     }
                     count++;
                 }
@@ -81,7 +83,9 @@ class Boid {
         if (count > 0) {
             cohesion.divideScalar(count).sub(this.position).multiplyScalar(this.cohesionStrength);
             alignment.divideScalar(count).sub(this.velocity).multiplyScalar(this.alignmentStrength);
-            separation.divideScalar(count).multiplyScalar(this.separationStrength);
+        }
+        if (sepCount > 0) {
+            separation.divideScalar(sepCount).multiplyScalar(this.separationStrength);
         }
         this.velocity.add(alignment).add(cohesion).add(separation);
         this.velocity.multiplyScalar(0.98);
