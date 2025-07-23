@@ -2,6 +2,7 @@ html, body {
     margin: 0;
     padding: 0;
     overflow: hidden;
+    height: 100%;
 }
 body {
     font-family: 'Recursive', sans-serif;
@@ -36,6 +37,10 @@ canvas {
   align-items: center;
   justify-content: center;
 }
+.overlay-content {
+  max-width: 70vw;
+  text-align: center;
+}
 #fps {
     margin-top: 5px;
 }
@@ -44,10 +49,7 @@ h1 {
   font-size: clamp(4rem, 10vw, 8rem);
   font-weight: 700;
   text-align: center;
-  color: transparent;
-  background: white; /* nur Platzhalter – wird vom Canvas ersetzt */
-  background-clip: text;
-  -webkit-background-clip: text;
-  mix-blend-mode: lighten; /* oder screen, overlay, difference */
+  color: #ffffff;
+  mix-blend-mode: screen;
   line-height: 1;
 }
