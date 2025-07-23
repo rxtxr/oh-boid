@@ -4,7 +4,7 @@ import { setupBackground } from './background.js';
 
 // Szene, Kamera und Renderer erstellen
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 4000);
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
 const renderer = new THREE.WebGLRenderer();
 renderer.setClearColor(0x222222);
 const nearColor = new THREE.Color(0x000000);
@@ -89,8 +89,8 @@ class Boid {
             if (this.position[axis] > 200) this.position[axis] = -200;
             else if (this.position[axis] < -200) this.position[axis] = 200;
         });
-        if (this.position.z > 200) this.position.z = -1000;
-        else if (this.position.z < -1000) this.position.z = 200;
+        if (this.position.z > 200) this.position.z = -500;
+        else if (this.position.z < -500) this.position.z = 200;
         attractor.influence(this);
     }
 }
@@ -151,7 +151,6 @@ const alignmentInput = document.getElementById('alignment-strength');
 const cohesionInput = document.getElementById('cohesion-strength');
 const separationInput = document.getElementById('separation-strength');
 const perceptionInput = document.getElementById('perception-radius');
-const blurDistanceInput = document.getElementById('blur-distance');
 const scale1Input = document.getElementById('cloud-scale1');
 const scale2Input = document.getElementById('cloud-scale2');
 const noiseMixInput = document.getElementById('cloud-mix');
@@ -159,9 +158,6 @@ const lowThInput = document.getElementById('cloud-low-threshold');
 const highThInput = document.getElementById('cloud-high-threshold');
 const fgColorInput = document.getElementById('foreground-color');
 const bgColorInput = document.getElementById('background-color');
-const toggleControlsBtn = document.getElementById('toggle-controls');
-const showControlsBtn = document.getElementById('show-controls');
-const configPanel = document.getElementById('boid-config');
 
 const numBoidsValue = document.getElementById('num-boids-value');
 const attractorStrengthValue = document.getElementById('attractor-strength-value');
@@ -170,7 +166,6 @@ const alignmentValue = document.getElementById('alignment-strength-value');
 const cohesionValue = document.getElementById('cohesion-strength-value');
 const separationValue = document.getElementById('separation-strength-value');
 const perceptionValue = document.getElementById('perception-radius-value');
-const blurDistanceValue = document.getElementById('blur-distance-value');
 const scale1Value = document.getElementById('cloud-scale1-value');
 const scale2Value = document.getElementById('cloud-scale2-value');
 const noiseMixValue = document.getElementById('cloud-mix-value');
@@ -186,7 +181,6 @@ function updateValueDisplays() {
     if (cohesionValue) cohesionValue.textContent = cohesionInput.value;
     if (separationValue) separationValue.textContent = separationInput.value;
     if (perceptionValue) perceptionValue.textContent = perceptionInput.value;
-    if (blurDistanceValue) blurDistanceValue.textContent = blurDistanceInput.value;
     if (scale1Value) scale1Value.textContent = scale1Input.value;
     if (scale2Value) scale2Value.textContent = scale2Input.value;
     if (noiseMixValue) noiseMixValue.textContent = noiseMixInput.value;
@@ -258,19 +252,7 @@ if (bgColorInput) {
     });
 }
 
-if (blurDistanceInput) {
-    maxDistance = parseFloat(blurDistanceInput.value);
-    blurDistanceInput.addEventListener('input', () => {
-        const v = parseFloat(blurDistanceInput.value);
-        if (!isNaN(v)) {
-            maxDistance = v;
-        }
-        updateValueDisplays();
-    });
-    blurDistanceInput.addEventListener('change', updateValueDisplays);
-}
-
-[maxSpeedInput, alignmentInput, cohesionInput, separationInput, perceptionInput, blurDistanceInput].forEach(inp => {
+[maxSpeedInput, alignmentInput, cohesionInput, separationInput, perceptionInput].forEach(inp => {
     if (inp) {
         inp.addEventListener('input', updateValueDisplays);
         inp.addEventListener('change', updateValueDisplays);
@@ -337,7 +319,6 @@ if (saveButton) {
             cloudMix: noiseMixInput.value,
             cloudLowThreshold: lowThInput.value,
             cloudHighThreshold: highThInput.value,
-            blurDistance: blurDistanceInput.value,
             showLines: showLinesInput.checked,
             showCoords: showCoordsInput.checked
         };
@@ -363,7 +344,6 @@ if (loadButton) {
         if (settings.cloudMix !== undefined) noiseMixInput.value = settings.cloudMix;
         if (settings.cloudLowThreshold !== undefined) lowThInput.value = settings.cloudLowThreshold;
         if (settings.cloudHighThreshold !== undefined) highThInput.value = settings.cloudHighThreshold;
-        if (settings.blurDistance !== undefined) blurDistanceInput.value = settings.blurDistance;
         if (settings.showLines !== undefined) {
             showLinesInput.checked = settings.showLines;
             showLines = showLinesInput.checked;
@@ -374,10 +354,6 @@ if (loadButton) {
             showCoords = showCoordsInput.checked;
         }
         updateValueDisplays();
-        if (blurDistanceInput) {
-            const val = parseFloat(blurDistanceInput.value);
-            if (!isNaN(val)) maxDistance = val;
-        }
         if (setCloudParams) {
             setCloudParams({
                 scale1: parseFloat(scale1Input.value),
@@ -391,17 +367,6 @@ if (loadButton) {
         if (!isNaN(num) && num >= 0) {
             updateBoidCount(num);
         }
-    });
-}
-
-if (toggleControlsBtn && showControlsBtn && configPanel) {
-    toggleControlsBtn.addEventListener('click', () => {
-        configPanel.style.display = 'none';
-        showControlsBtn.style.display = 'block';
-    });
-    showControlsBtn.addEventListener('click', () => {
-        configPanel.style.display = 'block';
-        showControlsBtn.style.display = 'none';
     });
 }
 
@@ -481,7 +446,7 @@ function updateBoidCount(newCount) {
 }
 
 const minDistance = 0;
-let maxDistance = 500;
+const maxDistance = 500;
 
 function animate() {
     requestAnimationFrame(animate);
