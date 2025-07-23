@@ -8,7 +8,13 @@ export function setupBackground(scene) {
   const geometry = new THREE.PlaneGeometry(2000, 1000);
   const uniforms = {
     time: { value: 0 },
-    cloudTex: { value: cloudTex }
+    cloudTex: { value: cloudTex },
+    scale1: { value: 4.0 },
+    scale2: { value: 8.0 },
+    noiseMix: { value: 0.5 },
+    lowThreshold: { value: 0.3 },
+    highThreshold: { value: 0.7 },
+    mixStrength: { value: 0.4 }
   };
   const material = new THREE.ShaderMaterial({
     uniforms,
@@ -24,6 +30,12 @@ export function setupBackground(scene) {
       varying vec2 vUv;
       uniform float time;
       uniform sampler2D cloudTex;
+      uniform float scale1;
+      uniform float scale2;
+      uniform float noiseMix;
+      uniform float lowThreshold;
+      uniform float highThreshold;
+      uniform float mixStrength;
 
       float rand(vec2 co){
         return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
@@ -48,10 +60,10 @@ export function setupBackground(scene) {
       void main() {
         vec2 uv = vUv;
         vec4 base = texture2D(cloudTex, uv);
-        float n = noise(uv*4.0 + vec2(time*0.05));
-        float n2 = noise(uv*8.0 - vec2(time*0.03));
-        float value = smoothstep(0.3,0.7,mix(n,n2,0.5));
-        vec3 color = mix(base.rgb, vec3(value), 0.4);
+        float n = noise(uv*scale1 + vec2(time*0.05));
+        float n2 = noise(uv*scale2 - vec2(time*0.03));
+        float value = smoothstep(lowThreshold, highThreshold, mix(n, n2, noiseMix));
+        vec3 color = mix(base.rgb, vec3(value), mixStrength);
         gl_FragColor = vec4(color, 1.0);
       }
     `
@@ -64,6 +76,14 @@ export function setupBackground(scene) {
     mesh,
     update(time) {
       uniforms.time.value = time;
+    },
+    setParams(params) {
+      if (params.scale1 !== undefined) uniforms.scale1.value = params.scale1;
+      if (params.scale2 !== undefined) uniforms.scale2.value = params.scale2;
+      if (params.noiseMix !== undefined) uniforms.noiseMix.value = params.noiseMix;
+      if (params.lowThreshold !== undefined) uniforms.lowThreshold.value = params.lowThreshold;
+      if (params.highThreshold !== undefined) uniforms.highThreshold.value = params.highThreshold;
+      if (params.mixStrength !== undefined) uniforms.mixStrength.value = params.mixStrength;
     }
   };
 }
