@@ -123,24 +123,55 @@ addBoids(500);
 rebuildGeometry();
 setupGUI(boids, attractor);
 
+// Input-Elemente und Anzeige der aktuellen Werte
 const numBoidsInput = document.getElementById('num-boids');
+const attractorStrengthInput = document.getElementById('attractor-strength');
+const maxSpeedInput = document.getElementById('max-speed');
+const alignmentInput = document.getElementById('alignment-strength');
+const cohesionInput = document.getElementById('cohesion-strength');
+const separationInput = document.getElementById('separation-strength');
+const perceptionInput = document.getElementById('perception-radius');
+
+const numBoidsValue = document.getElementById('num-boids-value');
+const attractorStrengthValue = document.getElementById('attractor-strength-value');
+const maxSpeedValue = document.getElementById('max-speed-value');
+const alignmentValue = document.getElementById('alignment-strength-value');
+const cohesionValue = document.getElementById('cohesion-strength-value');
+const separationValue = document.getElementById('separation-strength-value');
+const perceptionValue = document.getElementById('perception-radius-value');
+
+function updateValueDisplays() {
+    if (numBoidsValue) numBoidsValue.textContent = numBoidsInput.value;
+    if (attractorStrengthValue) attractorStrengthValue.textContent = attractorStrengthInput.value;
+    if (maxSpeedValue) maxSpeedValue.textContent = maxSpeedInput.value;
+    if (alignmentValue) alignmentValue.textContent = alignmentInput.value;
+    if (cohesionValue) cohesionValue.textContent = cohesionInput.value;
+    if (separationValue) separationValue.textContent = separationInput.value;
+    if (perceptionValue) perceptionValue.textContent = perceptionInput.value;
+}
+
+updateValueDisplays();
+
 if (numBoidsInput) {
     numBoidsInput.addEventListener('change', () => {
         const value = parseInt(numBoidsInput.value, 10);
         if (!isNaN(value) && value > 0) {
             updateBoidCount(value);
         }
+        updateValueDisplays();
     });
+    numBoidsInput.addEventListener('input', updateValueDisplays);
 }
 
-const attractorStrengthInput = document.getElementById('attractor-strength');
 if (attractorStrengthInput) {
     attractorStrengthInput.addEventListener('input', () => {
         const value = parseFloat(attractorStrengthInput.value);
         if (!isNaN(value)) {
             attractor.strength = value;
         }
+        updateValueDisplays();
     });
+    attractorStrengthInput.addEventListener('change', updateValueDisplays);
 }
 
 const showLinesInput = document.getElementById('show-lines');
@@ -155,6 +186,72 @@ const showCoordsInput = document.getElementById('show-coords');
 if (showCoordsInput) {
     showCoordsInput.addEventListener('change', () => {
         showCoords = showCoordsInput.checked;
+    });
+}
+
+[maxSpeedInput, alignmentInput, cohesionInput, separationInput, perceptionInput].forEach(inp => {
+    if (inp) {
+        inp.addEventListener('input', updateValueDisplays);
+        inp.addEventListener('change', updateValueDisplays);
+    }
+});
+
+const resetButton = document.getElementById('reset-canvas');
+if (resetButton) {
+    resetButton.addEventListener('click', () => {
+        boids.splice(0, boids.length);
+        const count = parseInt(numBoidsInput.value, 10) || 0;
+        addBoids(count);
+        rebuildGeometry();
+        updateCoordinateElements();
+    });
+}
+
+const saveButton = document.getElementById('save-settings');
+if (saveButton) {
+    saveButton.addEventListener('click', () => {
+        const settings = {
+            numBoids: numBoidsInput.value,
+            attractorStrength: attractorStrengthInput.value,
+            maxSpeed: maxSpeedInput.value,
+            alignmentStrength: alignmentInput.value,
+            cohesionStrength: cohesionInput.value,
+            separationStrength: separationInput.value,
+            perceptionRadius: perceptionInput.value,
+            showLines: showLinesInput.checked,
+            showCoords: showCoordsInput.checked
+        };
+        localStorage.setItem('boidSettings', JSON.stringify(settings));
+    });
+}
+
+const loadButton = document.getElementById('load-settings');
+if (loadButton) {
+    loadButton.addEventListener('click', () => {
+        const str = localStorage.getItem('boidSettings');
+        if (!str) return;
+        const settings = JSON.parse(str);
+        if (settings.numBoids !== undefined) numBoidsInput.value = settings.numBoids;
+        if (settings.attractorStrength !== undefined) attractorStrengthInput.value = settings.attractorStrength;
+        if (settings.maxSpeed !== undefined) maxSpeedInput.value = settings.maxSpeed;
+        if (settings.alignmentStrength !== undefined) alignmentInput.value = settings.alignmentStrength;
+        if (settings.cohesionStrength !== undefined) cohesionInput.value = settings.cohesionStrength;
+        if (settings.separationStrength !== undefined) separationInput.value = settings.separationStrength;
+        if (settings.perceptionRadius !== undefined) perceptionInput.value = settings.perceptionRadius;
+        if (settings.showLines !== undefined) {
+            showLinesInput.checked = settings.showLines;
+            showLines = showLinesInput.checked;
+            lineSegments.visible = showLines;
+        }
+        if (settings.showCoords !== undefined) {
+            showCoordsInput.checked = settings.showCoords;
+            showCoords = showCoordsInput.checked;
+        }
+        updateValueDisplays();
+        const num = parseInt(numBoidsInput.value, 10);
+        if (!isNaN(num) && num >= 0) {
+            updateBoidCount(num);
+        }
     });
 }
 

@@ -9,51 +9,62 @@
 <body>
   <!-- UI zur Konfiguration -->
   <div id="boid-config">
-    <label>
-        Anzahl der Boids:
-        <input type="number" id="num-boids" value="500" min="1">
-    </label>
+      <label>
+          Anzahl der Boids:
+          <input type="number" id="num-boids" value="500" min="1">
+          <span id="num-boids-value">500</span>
+      </label>
     <br>
-    <label>
-        Attraktor-Stärke:
-        <input type="range" id="attractor-strength" value="0.3" min="0" max="1" step="0.05">
-    </label>
+      <label>
+          Attraktor-Stärke:
+          <input type="range" id="attractor-strength" value="0.3" min="0" max="1" step="0.05">
+          <span id="attractor-strength-value">0.3</span>
+      </label>
     <br>
-    <label>
-        Maximale Geschwindigkeit:
-        <input type="range" id="max-speed" value="1" min="0.5" max="2" step="0.1">
-    </label>
+      <label>
+          Maximale Geschwindigkeit:
+          <input type="range" id="max-speed" value="1" min="0.5" max="2" step="0.1">
+          <span id="max-speed-value">1</span>
+      </label>
     <br>
-    <label>
-        Ausrichtungs-Stärke:
-        <input type="range" id="alignment-strength" value="0.2" min="0" max="0.5" step="0.01">
-    </label>
+      <label>
+          Ausrichtungs-Stärke:
+          <input type="range" id="alignment-strength" value="0.2" min="0" max="0.5" step="0.01">
+          <span id="alignment-strength-value">0.2</span>
+      </label>
     <br>
-    <label>
-        Kohäsions-Stärke:
-        <input type="range" id="cohesion-strength" value="0.01" min="0" max="0.05" step="0.001">
-    </label>
+      <label>
+          Kohäsions-Stärke:
+          <input type="range" id="cohesion-strength" value="0.01" min="0" max="0.05" step="0.001">
+          <span id="cohesion-strength-value">0.01</span>
+      </label>
     <br>
-    <label>
-        Trennungs-Stärke:
-        <input type="range" id="separation-strength" value="0.1" min="0" max="0.3" step="0.01">
-    </label>
+      <label>
+          Trennungs-Stärke:
+          <input type="range" id="separation-strength" value="0.1" min="0" max="0.3" step="0.01">
+          <span id="separation-strength-value">0.1</span>
+      </label>
     <br>
-    <label>
-        Wahrnehmungsradius:
-        <input type="range" id="perception-radius" value="60" min="20" max="80" step="1">
-    </label>
+      <label>
+          Wahrnehmungsradius:
+          <input type="range" id="perception-radius" value="60" min="20" max="80" step="1">
+          <span id="perception-radius-value">60</span>
+      </label>
     <br>
     <label>
         Linien zu Nachbarn anzeigen:
         <input type="checkbox" id="show-lines">
     </label>
     <br>
-    <label>
-        Koordinaten anzeigen:
-        <input type="checkbox" id="show-coords">
-    </label>
-  </div>
+      <label>
+          Koordinaten anzeigen:
+          <input type="checkbox" id="show-coords">
+      </label>
+      <br>
+      <button id="reset-canvas">Canvas zurücksetzen</button>
+      <button id="save-settings">Einstellungen speichern</button>
+      <button id="load-settings">Einstellungen laden</button>
+    </div>
 
   <script type="module">
     import './background.js';
