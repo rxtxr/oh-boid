@@ -17,3 +17,7 @@ canvas {
     font-family: sans-serif;
     padding: 5px;
 }
+
+#fps {
+    margin-top: 5px;
+}

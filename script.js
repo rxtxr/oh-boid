@@ -139,6 +139,11 @@ let coordSpans = [];
 let showLines = false;
 let showCoords = false;
 
+const fpsDisplay = document.getElementById('fps-display');
+const frameTimes = [];
+const maxFrameSamples = 60;
+let lastFrameTime = performance.now();
+
 addBoids(500);
 rebuildGeometry();
 setupGUI(boids, attractor);
@@ -445,12 +450,37 @@ function updateBoidCount(newCount) {
     updateCoordinateElements();
 }
 
+function adjustSettings(fps) {
+    if (fps < 30) {
+        if (boids.length > 100) {
+            updateBoidCount(Math.floor(boids.length * 0.9));
+            if (numBoidsInput) numBoidsInput.value = boids.length;
+            updateValueDisplays();
+        }
+        if (showLines) {
+            showLines = false;
+            lineSegments.visible = false;
+            if (showLinesInput) showLinesInput.checked = false;
+        }
+    }
+}
+
 const minDistance = 0;
 const maxDistance = 500;
 
 function animate() {
     requestAnimationFrame(animate);
-    updateBackground(performance.now() * 0.001);
+    const now = performance.now();
+    const delta = now - lastFrameTime;
+    lastFrameTime = now;
+    frameTimes.push(delta);
+    if (frameTimes.length > maxFrameSamples) frameTimes.shift();
+    const avg = frameTimes.reduce((a, b) => a + b, 0) / frameTimes.length;
+    const fps = 1000 / avg;
+    if (fpsDisplay) fpsDisplay.textContent = fps.toFixed(1);
+    adjustSettings(fps);
+
+    updateBackground(now * 0.001);
     boids.forEach((boid, i) => {
         boid.update(boids);
         vertices.set([boid.position.x, boid.position.y, boid.position.z], i * 3);
