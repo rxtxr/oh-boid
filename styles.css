@@ -3,10 +3,18 @@ html, body {
     padding: 0;
     overflow: hidden;
 }
+body {
+    font-family: 'Recursive', sans-serif;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    font-variation-settings: "CASL" 0.5, "slnt" 0, "wght" 400;
+    color: #222;
+}
 canvas {
     display: block;
     margin: 0;
     padding: 0;
+    position: fixed;
 }
 #boid-config {
     position: fixed;
@@ -17,7 +25,29 @@ canvas {
     font-family: sans-serif;
     padding: 5px;
 }
-
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 #fps {
     margin-top: 5px;
+}
+h1 {
+  font-family: 'Literata', serif;
+  font-size: clamp(4rem, 10vw, 8rem);
+  font-weight: 700;
+  text-align: center;
+  color: transparent;
+  background: white; /* nur Platzhalter – wird vom Canvas ersetzt */
+  background-clip: text;
+  -webkit-background-clip: text;
+  mix-blend-mode: lighten; /* oder screen, overlay, difference */
+  line-height: 1;
 }
