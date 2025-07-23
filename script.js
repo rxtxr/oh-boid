@@ -96,10 +96,12 @@ class Boid {
         this.velocity.multiplyScalar(0.98);
         this.velocity.clampLength(0.5, this.maxSpeed);
         this.position.add(this.velocity);
-        ['x','y','z'].forEach(axis => {
+        ['x','y'].forEach(axis => {
             if (this.position[axis] > 200) this.position[axis] = -200;
             else if (this.position[axis] < -200) this.position[axis] = 200;
         });
+        if (this.position.z > 200) this.position.z = -500;
+        else if (this.position.z < -500) this.position.z = 200;
         attractor.influence(this);
     }
 }
