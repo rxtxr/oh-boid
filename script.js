@@ -1,5 +1,6 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js';
 import { setupGUI } from './gui.js';
+import { setupBackground } from './background.js';
 
 // Szene, Kamera und Renderer erstellen
 const scene = new THREE.Scene();
@@ -11,13 +12,7 @@ const nearColor = new THREE.Color(0x000000);
 const farColor = backgroundColor;
 
 // Hintergrund
-const loader = new THREE.TextureLoader();
-const backgroundTexture = loader.load('clouds.jpg');
-const backgroundMaterial = new THREE.MeshBasicMaterial({ map: backgroundTexture });
-const backgroundGeometry = new THREE.PlaneGeometry(window.innerWidth, window.innerHeight);
-const backgroundMesh = new THREE.Mesh(backgroundGeometry, backgroundMaterial);
-backgroundMesh.position.z = -500;
-scene.add(backgroundMesh);
+const { update: updateBackground } = setupBackground(scene);
 
 renderer.setSize(window.innerWidth, window.innerHeight);
 window.addEventListener('resize', onWindowResize);
@@ -45,12 +40,6 @@ class Attractor {
     }
 }
 const attractor = new Attractor(new THREE.Vector3(0, 0, 0), 0.3);
-const attractorMesh = new THREE.Mesh(
-    new THREE.SphereGeometry(1),
-    new THREE.MeshBasicMaterial()
-);
-attractorMesh.position.copy(attractor.position);
-scene.add(attractorMesh);
 
 // Boids
 class Boid {
@@ -361,6 +350,7 @@ const maxDistance = 500;
 
 function animate() {
     requestAnimationFrame(animate);
+    updateBackground(performance.now() * 0.001);
     boids.forEach((boid, i) => {
         boid.update(boids);
         vertices.set([boid.position.x, boid.position.y, boid.position.z], i * 3);

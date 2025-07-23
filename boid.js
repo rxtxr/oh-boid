@@ -2,7 +2,7 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.m
 
 export function createBoids(boids, scene) {
   const geometry = new THREE.SphereGeometry(1.5, 6, 6);
-  const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  const material = new THREE.MeshBasicMaterial({ color: 0xdddddd });
   const range = 300;
 
   class Boid {
