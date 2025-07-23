@@ -1,7 +1,4 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js';
-import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/postprocessing/RenderPass.js';
-import { BokehPass } from 'https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/postprocessing/BokehPass.js';
 import { setupGUI } from './gui.js';
 import { setupBackground } from './background.js';
 
@@ -10,18 +7,6 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
 const renderer = new THREE.WebGLRenderer();
 renderer.setClearColor(0x222222);
-const composer = new EffectComposer(renderer);
-const renderPass = new RenderPass(scene, camera);
-composer.addPass(renderPass);
-const bokehPass = new BokehPass(scene, camera, {
-    focus: 100.0,
-    aperture: 0.0001,
-    maxblur: 0.005,
-    width: window.innerWidth,
-    height: window.innerHeight
-});
-bokehPass.renderToScreen = true;
-composer.addPass(bokehPass);
 const nearColor = new THREE.Color(0x000000);
 // Use the renderer's clear color so distant boids blend with the background
 const farColor = renderer.getClearColor(new THREE.Color());
@@ -35,8 +20,6 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    composer.setSize(window.innerWidth, window.innerHeight);
-    bokehPass.uniforms['aspect'].value = camera.aspect;
 }
 document.body.appendChild(renderer.domElement);
 camera.position.z = 100;
@@ -173,8 +156,6 @@ const scale2Input = document.getElementById('cloud-scale2');
 const noiseMixInput = document.getElementById('cloud-mix');
 const lowThInput = document.getElementById('cloud-low-threshold');
 const highThInput = document.getElementById('cloud-high-threshold');
-const blurNearInput = document.getElementById('blur-near');
-const blurFarInput = document.getElementById('blur-far');
 const fgColorInput = document.getElementById('foreground-color');
 const bgColorInput = document.getElementById('background-color');
 
@@ -190,8 +171,6 @@ const scale2Value = document.getElementById('cloud-scale2-value');
 const noiseMixValue = document.getElementById('cloud-mix-value');
 const lowThValue = document.getElementById('cloud-low-threshold-value');
 const highThValue = document.getElementById('cloud-high-threshold-value');
-const blurNearValue = document.getElementById('blur-near-value');
-const blurFarValue = document.getElementById('blur-far-value');
 // We don't display color values, but inputs exist for user adjustments
 
 function updateValueDisplays() {
@@ -207,8 +186,6 @@ function updateValueDisplays() {
     if (noiseMixValue) noiseMixValue.textContent = noiseMixInput.value;
     if (lowThValue) lowThValue.textContent = lowThInput.value;
     if (highThValue) highThValue.textContent = highThInput.value;
-    if (blurNearValue) blurNearValue.textContent = blurNearInput.value;
-    if (blurFarValue) blurFarValue.textContent = blurFarInput.value;
 }
 
 updateValueDisplays();
@@ -221,8 +198,6 @@ if (setCloudParams) {
         highThreshold: parseFloat(highThInput.value)
     });
 }
-if (blurNearInput) bokehPass.materialBokeh.uniforms['aperture'].value = parseFloat(blurNearInput.value);
-if (blurFarInput) bokehPass.materialBokeh.uniforms['maxblur'].value = parseFloat(blurFarInput.value);
 
 if (numBoidsInput) {
     numBoidsInput.addEventListener('change', () => {
@@ -281,19 +256,6 @@ if (bgColorInput) {
     if (inp) {
         inp.addEventListener('input', updateValueDisplays);
         inp.addEventListener('change', updateValueDisplays);
-    }
-});
-
-[blurNearInput, blurFarInput].forEach(inp => {
-    if (inp) {
-        inp.addEventListener('input', () => {
-            updateValueDisplays();
-            if (blurNearInput) bokehPass.materialBokeh.uniforms['aperture'].value = parseFloat(blurNearInput.value);
-            if (blurFarInput) bokehPass.materialBokeh.uniforms['maxblur'].value = parseFloat(blurFarInput.value);
-        });
-        inp.addEventListener('change', () => {
-            updateValueDisplays();
-        });
     }
 });
 
@@ -357,8 +319,6 @@ if (saveButton) {
             cloudMix: noiseMixInput.value,
             cloudLowThreshold: lowThInput.value,
             cloudHighThreshold: highThInput.value,
-            blurNear: blurNearInput.value,
-            blurFar: blurFarInput.value,
             showLines: showLinesInput.checked,
             showCoords: showCoordsInput.checked
         };
@@ -384,8 +344,6 @@ if (loadButton) {
         if (settings.cloudMix !== undefined) noiseMixInput.value = settings.cloudMix;
         if (settings.cloudLowThreshold !== undefined) lowThInput.value = settings.cloudLowThreshold;
         if (settings.cloudHighThreshold !== undefined) highThInput.value = settings.cloudHighThreshold;
-        if (settings.blurNear !== undefined) blurNearInput.value = settings.blurNear;
-        if (settings.blurFar !== undefined) blurFarInput.value = settings.blurFar;
         if (settings.showLines !== undefined) {
             showLinesInput.checked = settings.showLines;
             showLines = showLinesInput.checked;
@@ -396,8 +354,6 @@ if (loadButton) {
             showCoords = showCoordsInput.checked;
         }
         updateValueDisplays();
-        if (blurNearInput) bokehPass.materialBokeh.uniforms['aperture'].value = parseFloat(blurNearInput.value);
-        if (blurFarInput) bokehPass.materialBokeh.uniforms['maxblur'].value = parseFloat(blurFarInput.value);
         if (setCloudParams) {
             setCloudParams({
                 scale1: parseFloat(scale1Input.value),
@@ -524,6 +480,6 @@ function animate() {
     }
     boidGeometry.attributes.position.needsUpdate = true;
     boidGeometry.attributes.color.needsUpdate = true;
-    composer.render();
+    renderer.render(scene, camera);
 }
 animate();
