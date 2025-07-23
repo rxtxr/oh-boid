@@ -14,7 +14,8 @@ export function setupBackground(scene) {
     noiseMix: { value: 0.5 },
     lowThreshold: { value: 0.3 },
     highThreshold: { value: 0.7 },
-    mixStrength: { value: 0.4 }
+    mixStrength: { value: 0.4 },
+    blurAmount: { value: 0.0 }
   };
   const material = new THREE.ShaderMaterial({
     uniforms,
@@ -36,6 +37,7 @@ export function setupBackground(scene) {
       uniform float lowThreshold;
       uniform float highThreshold;
       uniform float mixStrength;
+      uniform float blurAmount;
 
       float rand(vec2 co){
         return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
@@ -59,7 +61,12 @@ export function setupBackground(scene) {
 
       void main() {
         vec2 uv = vUv;
-        vec4 base = texture2D(cloudTex, uv);
+        vec4 base = vec4(0.0);
+        base += texture2D(cloudTex, uv) * 0.2;
+        base += texture2D(cloudTex, uv + vec2(blurAmount, 0.0)) * 0.2;
+        base += texture2D(cloudTex, uv - vec2(blurAmount, 0.0)) * 0.2;
+        base += texture2D(cloudTex, uv + vec2(0.0, blurAmount)) * 0.2;
+        base += texture2D(cloudTex, uv - vec2(0.0, blurAmount)) * 0.2;
         float n = noise(uv*scale1 + vec2(time*0.05));
         float n2 = noise(uv*scale2 - vec2(time*0.03));
         float value = smoothstep(lowThreshold, highThreshold, mix(n, n2, noiseMix));
@@ -69,7 +76,7 @@ export function setupBackground(scene) {
     `
   });
   const mesh = new THREE.Mesh(geometry, material);
-  mesh.position.z = -500;
+  mesh.position.z = -1500;
   scene.add(mesh);
 
   return {
@@ -84,6 +91,7 @@ export function setupBackground(scene) {
       if (params.lowThreshold !== undefined) uniforms.lowThreshold.value = params.lowThreshold;
       if (params.highThreshold !== undefined) uniforms.highThreshold.value = params.highThreshold;
       if (params.mixStrength !== undefined) uniforms.mixStrength.value = params.mixStrength;
+      if (params.blurAmount !== undefined) uniforms.blurAmount.value = params.blurAmount;
     }
   };
 }
