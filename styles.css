@@ -49,10 +49,7 @@ h1 {
   font-size: clamp(4rem, 10vw, 8rem);
   font-weight: 700;
   text-align: center;
-  color: transparent;
-  background: white; /* Placeholder - canvas shows through */
-  background-clip: text;
-  -webkit-background-clip: text;
-  mix-blend-mode: screen;
+  color: #ffffff;
+  mix-blend-mode: overlay;
   line-height: 1;
 }
