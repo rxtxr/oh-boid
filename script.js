@@ -199,9 +199,24 @@ if (showCoordsInput) {
 const resetButton = document.getElementById('reset-canvas');
 if (resetButton) {
     resetButton.addEventListener('click', () => {
+        const ref = boids[0];
+        const current = ref ? {
+            maxSpeed: ref.maxSpeed,
+            alignmentStrength: ref.alignmentStrength,
+            cohesionStrength: ref.cohesionStrength,
+            separationStrength: ref.separationStrength,
+            perceptionRadius: ref.perceptionRadius
+        } : {
+            maxSpeed: parseFloat(maxSpeedInput.value) || 1,
+            alignmentStrength: parseFloat(alignmentInput.value) || 0.2,
+            cohesionStrength: parseFloat(cohesionInput.value) || 0.01,
+            separationStrength: parseFloat(separationInput.value) || 0.1,
+            perceptionRadius: parseFloat(perceptionInput.value) || 60
+        };
+
         boids.splice(0, boids.length);
         const count = parseInt(numBoidsInput.value, 10) || 0;
-        addBoids(count);
+        addBoids(count, current);
         rebuildGeometry();
         updateCoordinateElements();
     });
@@ -304,11 +319,11 @@ function updateLines() {
     lineSegments.geometry.setAttribute('position', new THREE.BufferAttribute(arr, 3));
 }
 
-function addBoids(count) {
+function addBoids(count, settings) {
     for (let i = 0; i < count; i++) {
         const b = new Boid();
-        if (boids.length > 0) {
-            const ref = boids[0];
+        const ref = settings || boids[0];
+        if (ref) {
             b.maxSpeed = ref.maxSpeed;
             b.alignmentStrength = ref.alignmentStrength;
             b.cohesionStrength = ref.cohesionStrength;
