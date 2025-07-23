@@ -6,7 +6,7 @@ import { setupBackground } from './background.js';
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
 const renderer = new THREE.WebGLRenderer();
-renderer.setClearColor(0xefefef);
+renderer.setClearColor(0x222222);
 const nearColor = new THREE.Color(0x000000);
 // Use the renderer's clear color so distant boids blend with the background
 const farColor = renderer.getClearColor(new THREE.Color());
@@ -95,11 +95,31 @@ class Boid {
     }
 }
 
+function createBoidTexture() {
+    const size = 64;
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+    gradient.addColorStop(0, 'rgba(255,255,255,1)');
+    gradient.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0,0,size,size);
+    return new THREE.CanvasTexture(canvas);
+}
+
 const boids = [];
 let colors;
 let vertices;
 let boidGeometry = new THREE.BufferGeometry();
-const boidMaterial = new THREE.PointsMaterial({ size: 2, vertexColors: true });
+const boidTexture = createBoidTexture();
+const boidMaterial = new THREE.PointsMaterial({
+    size: 4,
+    vertexColors: true,
+    map: boidTexture,
+    transparent: true,
+    depthWrite: false
+});
 let points = new THREE.Points(boidGeometry, boidMaterial);
 scene.add(points);
 
@@ -136,6 +156,8 @@ const scale2Input = document.getElementById('cloud-scale2');
 const noiseMixInput = document.getElementById('cloud-mix');
 const lowThInput = document.getElementById('cloud-low-threshold');
 const highThInput = document.getElementById('cloud-high-threshold');
+const fgColorInput = document.getElementById('foreground-color');
+const bgColorInput = document.getElementById('background-color');
 
 const numBoidsValue = document.getElementById('num-boids-value');
 const attractorStrengthValue = document.getElementById('attractor-strength-value');
@@ -149,6 +171,7 @@ const scale2Value = document.getElementById('cloud-scale2-value');
 const noiseMixValue = document.getElementById('cloud-mix-value');
 const lowThValue = document.getElementById('cloud-low-threshold-value');
 const highThValue = document.getElementById('cloud-high-threshold-value');
+// We don't display color values, but inputs exist for user adjustments
 
 function updateValueDisplays() {
     if (numBoidsValue) numBoidsValue.textContent = numBoidsInput.value;
@@ -210,6 +233,22 @@ const showCoordsInput = document.getElementById('show-coords');
 if (showCoordsInput) {
     showCoordsInput.addEventListener('change', () => {
         showCoords = showCoordsInput.checked;
+    });
+}
+
+if (fgColorInput) {
+    nearColor.set(fgColorInput.value);
+    fgColorInput.addEventListener('input', () => {
+        nearColor.set(fgColorInput.value);
+    });
+}
+
+if (bgColorInput) {
+    renderer.setClearColor(bgColorInput.value);
+    farColor.set(bgColorInput.value);
+    bgColorInput.addEventListener('input', () => {
+        renderer.setClearColor(bgColorInput.value);
+        farColor.set(bgColorInput.value);
     });
 }
 
