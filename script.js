@@ -45,7 +45,12 @@ class Attractor {
     }
 }
 const attractor = new Attractor(new THREE.Vector3(0, 0, 0), 0.3);
-scene.add(new THREE.Mesh(new THREE.SphereGeometry(0), new THREE.MeshBasicMaterial()).position.copy(attractor.position));
+const attractorMesh = new THREE.Mesh(
+    new THREE.SphereGeometry(1),
+    new THREE.MeshBasicMaterial()
+);
+attractorMesh.position.copy(attractor.position);
+scene.add(attractorMesh);
 
 // Boids
 class Boid {
