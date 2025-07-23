@@ -7,9 +7,9 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
 const renderer = new THREE.WebGLRenderer();
 renderer.setClearColor(0xefefef);
-const backgroundColor = new THREE.Color(0xcccccc);
 const nearColor = new THREE.Color(0x000000);
-const farColor = backgroundColor;
+// Use the renderer's clear color so distant boids blend with the background
+const farColor = renderer.getClearColor(new THREE.Color());
 
 // Hintergrund
 const { update: updateBackground, setParams: setCloudParams } = setupBackground(scene);
@@ -415,7 +415,8 @@ function animate() {
     boids.forEach((boid, i) => {
         boid.update(boids);
         vertices.set([boid.position.x, boid.position.y, boid.position.z], i * 3);
-        const distanceFactor = (boid.position.distanceTo(camera.position) - minDistance) / (maxDistance - minDistance);
+        let distanceFactor = (boid.position.distanceTo(camera.position) - minDistance) / (maxDistance - minDistance);
+        distanceFactor = THREE.MathUtils.clamp(distanceFactor, 0, 1);
         const boidColor = nearColor.clone().lerp(farColor, distanceFactor);
         colors.set([boidColor.r, boidColor.g, boidColor.b], i * 3);
     });
